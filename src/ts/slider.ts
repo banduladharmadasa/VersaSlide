@@ -1,3 +1,5 @@
+
+
 export default class VersaSlide {
     private slides: HTMLElement[];
     private container: HTMLElement;
@@ -15,29 +17,11 @@ export default class VersaSlide {
         // Initialize slider
         this.initSlides();
         this.showSlide(this.index);
+        this.setupEventListeners();
     }
+    
 
     private initSlides() {
-        /*
-        // Clone and append the last slide to the start for infinite loop
-        let lastClone = this.createSlide(this.slidesContent[this.slidesContent.length - 1]);
-        lastClone.style.left = `-${this.slideWidth}px`;
-        this.container.appendChild(lastClone);
-        this.slides.push(lastClone);
-
-        // Append original slides
-        this.slidesContent.forEach(content => {
-            let newSlide = this.createSlide(content);
-            this.container.appendChild(newSlide);
-            this.slides.push(newSlide);
-        });
-
-        // Clone and append the first slide to the end for infinite loop
-        let firstClone = this.createSlide(this.slidesContent[0]);
-        this.container.appendChild(firstClone);
-        this.slides.push(firstClone);
-        */
-
         // Clone and append the last slide to the start for infinite loop
         let lastClone = this.slidesContent[this.slidesContent.length - 1].cloneNode(true) as HTMLElement;
         lastClone.style.left = `-${this.slideWidth}px`;
@@ -52,22 +36,9 @@ export default class VersaSlide {
             this.slides.push(slide);
         });
 
-
-
-
-
-
         // Set initial position
         this.container.style.transform = `translateX(-${this.slideWidth}px)`;
-    }
-
-    private createSlide(content: string): HTMLElement {
-        let newSlide = document.createElement('div');
-        newSlide.classList.add('slide');
-        newSlide.textContent = content;
-        newSlide.style.width = `${this.slideWidth}px`; // Set the width of the slide
-        return newSlide;
-    }
+    }    
 
     private showSlide(index: number) {
         let offset = -this.slideWidth * index;
@@ -96,7 +67,6 @@ export default class VersaSlide {
     }
 
     public nextSlide() {
-        console.log(this.index)
         if (this.index < this.slides.length - 1) {
             this.index++;
             this.showSlide(this.index);
@@ -114,5 +84,9 @@ export default class VersaSlide {
         this.container.addEventListener('transitionend', () => {
             this.adjustInfiniteLoop();
         });
+    }
+
+    public getContainer(){
+        return this.container;
     }
 }
