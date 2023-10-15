@@ -36,6 +36,10 @@ export default class VersaSlide {
             this.slides.push(slide);
         });
 
+        
+        firstClone.classList.add("cloned");
+        lastClone.classList.add("cloned");
+
         // Set initial position
         this.container.style.transform = `translateX(-${this.slideWidth}px)`;
     }    
@@ -66,6 +70,9 @@ export default class VersaSlide {
         }
     }
 
+    /**
+     * Move to the nex slide
+     */
     public nextSlide() {
         if (this.index < this.slides.length - 1) {
             this.index++;
@@ -73,11 +80,23 @@ export default class VersaSlide {
         }
     }
 
+    /**
+     * Move to the previous slide
+     */
     public prevSlide() {
         if (this.index > 0) {
             this.index--;
             this.showSlide(this.index);
         }
+    }
+
+    
+    /**
+     * Move to a specified slide
+     * @param index : the slide index
+     */
+    moveTo(index: number) {
+        this.showSlide(++index);
     }
 
     public setupEventListeners() {
@@ -88,5 +107,9 @@ export default class VersaSlide {
 
     public getContainer(){
         return this.container;
+    }
+
+    public getActualSlidesCount() : number{
+        return this.slides.filter((slide) => !slide.classList.contains('cloned')).length;
     }
 }
