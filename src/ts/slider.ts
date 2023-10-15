@@ -19,7 +19,7 @@ export default class VersaSlide {
         this.showSlide(this.index);
         this.setupEventListeners();
     }
-    
+
 
     private initSlides() {
         // Clone and append the last slide to the start for infinite loop
@@ -36,13 +36,13 @@ export default class VersaSlide {
             this.slides.push(slide);
         });
 
-        
-        firstClone.classList.add("cloned");
-        lastClone.classList.add("cloned");
+
+        firstClone.classList.add("cloned-first");
+        lastClone.classList.add("cloned-last");
 
         // Set initial position
         this.container.style.transform = `translateX(-${this.slideWidth}px)`;
-    }    
+    }
 
     private showSlide(index: number) {
         let offset = -this.slideWidth * index;
@@ -90,7 +90,7 @@ export default class VersaSlide {
         }
     }
 
-    
+
     /**
      * Move to a specified slide
      * @param index : the slide index
@@ -99,17 +99,29 @@ export default class VersaSlide {
         this.showSlide(++index);
     }
 
-    public setupEventListeners() {
+    public setupEventListeners() : void {
         this.container.addEventListener('transitionend', () => {
             this.adjustInfiniteLoop();
         });
     }
 
-    public getContainer(){
+    public getContainer(): HTMLElement {
         return this.container;
     }
 
-    public getActualSlidesCount() : number{
-        return this.slides.filter((slide) => !slide.classList.contains('cloned')).length;
+    public getActualSlidesCount(): number {
+        return this.slides.filter((slide) => !(slide.classList.contains('cloned-last') || slide.classList.contains('cloned-first'))).length;
+    }
+
+    public getCurrentIndex() : number {
+        let index = this.index;
+        console.log(index)
+        if(this.index < this.slides.length - 1){
+            index--;
+        } else if(this.index > 0){
+            index++;
+        }
+
+        return index;
     }
 }

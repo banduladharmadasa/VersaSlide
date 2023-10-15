@@ -30,13 +30,10 @@ export default class Controls {
         this.nextWrapper = this.createControlWrapper(controlsDiv, 'versaslider-controls-next-wrapper');
         this.bulletWrapper = this.createControlWrapper(controlsDiv, 'versaslider-controls-bullet-wrapper');
 
-
-
         // Append the main wrapper to the container
         container.appendChild(controlsDiv);
         this.createButtons();
 
-        this.setupEventListners();
     }
 
     createControlWrapper(parent: HTMLElement, className: string) {
@@ -53,48 +50,53 @@ export default class Controls {
         return btn;
     }
 
-    createButtons(){
+    createButtons() {
         //create previous button
         const prevBtn = this.createButton("versaslider-controls-previous-button", "versaslider-prev-btn");
         this.previousWrapper.appendChild(prevBtn);
-        prevBtn.addEventListener("click", (evt) =>{
+        prevBtn.addEventListener("click", (evt) => {
             this.slider.prevSlide();
+            this.activateBullet();
             evt.preventDefault();
         });
 
         //create next button
         const nextBtn = this.createButton("versaslider-controls-next-button", "versaslider-next-btn");
         this.nextWrapper.appendChild(nextBtn);
-        nextBtn.addEventListener("click", (evt) =>{
+        nextBtn.addEventListener("click", (evt) => {
             this.slider.nextSlide();
+            this.activateBullet();
             evt.preventDefault();
         });
 
         //create bullet buttons (dots)
         const count = this.slider.getActualSlidesCount();
-        for(let i = 0; i < count; i++){
+        for (let i = 0; i < count; i++) {
             const dot = this.createButton("versaslider-controls-bullet", "versaslider-bullet-" + i);
             this.bulletWrapper.appendChild(dot);
-            dot.addEventListener("click", (evt) =>{
+            dot.addEventListener("click", (evt) => {
                 this.slider.moveTo(i);
                 evt.preventDefault();
-            })
+            });
+
         }
 
-        
-    }
-
-
-
-    setupEventListners() {
-        document.getElementById('next')!.addEventListener('click', () => {
-            this.slider.nextSlide();
-        });
-
-        document.getElementById('prev')!.addEventListener('click', () => {
-            this.slider.prevSlide();
-        });
 
     }
+
+    activateBullet(){
+        const index = this.slider.getCurrentIndex();
+
+        (Array.from(this.bulletWrapper.childNodes) as HTMLElement[]).forEach((node, i) => {
+            if(index !== i){
+                node.classList.remove("active");
+            } else{
+                node.classList.add("active");
+            }
+            
+        });
+
+    }
+
 }
 
