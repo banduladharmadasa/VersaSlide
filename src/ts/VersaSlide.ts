@@ -1,4 +1,9 @@
 
+import ControlPanel from "./control-panel";
+
+interface VersaSlideOptions {
+    loop: boolean,
+};
 
 export default class VersaSlide {
     private slides: HTMLElement[];
@@ -7,7 +12,7 @@ export default class VersaSlide {
     private slideWidth: number;
     private slidesContent: HTMLElement[];
 
-    constructor(private containerId: string) {
+    constructor(private containerId: string, private options: VersaSlideOptions) {
         this.container = document.querySelector(this.containerId)!;
         this.slidesContent = Array.from(this.container.children) as HTMLElement[];
         this.slides = [];
@@ -17,18 +22,18 @@ export default class VersaSlide {
         // Initialize slider
         this.initSlides();
         this.showSlide(this.index);
-        this.setupEventListeners();
+
+
+        const controlPanel = new ControlPanel(this);
+        controlPanel.createControls();
     }
 
 
     private initSlides() {
-        // Clone and append the last slide to the start for infinite loop
-        let lastClone = this.slidesContent[this.slidesContent.length - 1].cloneNode(true) as HTMLElement;
-        lastClone.style.left = `-${this.slideWidth}px`;
-        this.container.insertBefore(lastClone, this.container.firstChild);
-        // Clone and append the first slide to the end for infinite loop
-        let firstClone = this.slidesContent[0].cloneNode(true) as HTMLElement;
-        this.container.appendChild(firstClone);
+        if (this.options.loop) {
+            this.prepareForInfiniteLoop();
+        }
+
 
         (Array.from(this.container.children) as HTMLElement[]).forEach((slide) => {
             slide.classList.add('slide');
@@ -36,18 +41,27 @@ export default class VersaSlide {
             this.slides.push(slide);
         });
 
-
+    }
+    prepareForInfiniteLoop() {
+        // Clone and append the last slide to the start for infinite loop
+        let lastClone = this.slidesContent[this.slidesContent.length - 1].cloneNode(true) as HTMLElement;
+        lastClone.style.left = `-${this.slideWidth}px`;
+        this.container.insertBefore(lastClone, this.container.firstChild);
+        // Clone and append the first slide to the end for infinite loop
+        let firstClone = this.slidesContent[0].cloneNode(true) as HTMLElement;
+        this.container.appendChild(firstClone);
         firstClone.classList.add("cloned-first");
         lastClone.classList.add("cloned-last");
+
+        this.setupEventListeners();
 
         // Set initial position
         this.container.style.transform = `translateX(-${this.slideWidth}px)`;
     }
 
     private showSlide(index: number) {
-        let offset = -this.slideWidth * index;
+        let offset = -this.slideWidth * (index - (this.options.loop?0:1));
         this.container.style.transform = `translateX(${offset}px)`;
-        console.log(offset)
     }
 
     private adjustInfiniteLoop() {
@@ -99,7 +113,7 @@ export default class VersaSlide {
         this.showSlide(++index);
     }
 
-    public setupEventListeners() : void {
+    public setupEventListeners(): void {
         this.container.addEventListener('transitionend', () => {
             this.adjustInfiniteLoop();
         });
@@ -113,14 +127,17 @@ export default class VersaSlide {
         return this.slides.filter((slide) => !(slide.classList.contains('cloned-last') || slide.classList.contains('cloned-first'))).length;
     }
 
-    public getCurrentIndex() : number {
+    public getCurrentIndex(): number {
         let index = this.index;
-        console.log(index)
-        if(this.index < this.slides.length - 1){
-            index--;
-        } else if(this.index > 0){
-            index++;
+
+        if (this.options.loop) {
+            if (this.index < this.slides.length - 1) {
+                index--;
+            } else if (this.index > 0) {
+                index++;
+            }
         }
+
 
         return index;
     }

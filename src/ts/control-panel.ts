@@ -1,4 +1,4 @@
-import VersaSlide from "./slider";
+import VersaSlide from "./VersaSlide";
 
 /**
  * Add the controls dynamically
