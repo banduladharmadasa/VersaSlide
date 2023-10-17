@@ -34,6 +34,46 @@ export default class Controls {
         container.appendChild(controlsDiv);
         this.createButtons();
 
+        if(this.slider.isDraggable()){
+            this.enableDragging();
+        }
+        
+
+    }
+
+    enableDragging() {
+        const container = this.slider.getContainer();
+        let isDragging = false;
+        let offsetX: number;
+
+        container.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            offsetX = e.clientX - container.getBoundingClientRect().left;
+        });
+
+        container.addEventListener("mousemove", (e) => {
+            if (!isDragging) return;
+            const newX = e.clientX - offsetX;
+            container.style.transform = `translateX(${newX}px)`;
+        });
+
+        container.addEventListener("mouseup", (evt) => {
+            isDragging = false;
+            const computedStyle = window.getComputedStyle(container);
+            const transform = computedStyle.getPropertyValue("transform");
+            const matrix = new DOMMatrixReadOnly(transform);
+            const translateX = matrix.m41;
+
+            if(translateX < 0){
+                this.slider.nextSlide();
+            } else{
+                this.slider.prevSlide();
+            }
+        });
+
+        container.addEventListener("dragstart", (e) => {
+            e.preventDefault();
+        })
     }
 
     createControlWrapper(parent: HTMLElement, className: string) {
@@ -84,16 +124,16 @@ export default class Controls {
 
     }
 
-    activateBullet(){
+    activateBullet() {
         const index = this.slider.getCurrentIndex();
 
         (Array.from(this.bulletWrapper.childNodes) as HTMLElement[]).forEach((node, i) => {
-            if(index !== i){
+            if (index !== i) {
                 node.classList.remove("active");
-            } else{
+            } else {
                 node.classList.add("active");
             }
-            
+
         });
 
     }

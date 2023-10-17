@@ -164,4 +164,12 @@ export default class VersaSlide {
 
         return index;
     }
+
+    public getSlideWidth() {
+        return this.slideWidth;
+    }
+
+    public isDraggable() {
+        return this.options.draggable;
+    }    
 }
