@@ -66,6 +66,10 @@
       &:hover{
         background-color: $bullet-hover-bg-color;
       }
+
+      &.active{
+        background-color: red;
+      }
     }
   }
 }

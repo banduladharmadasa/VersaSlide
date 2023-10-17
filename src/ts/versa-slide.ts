@@ -2,8 +2,12 @@
 import ControlPanel from "./control-panel";
 
 interface VersaSlideOptions {
-    loop?: boolean,
+    autoPlay?: boolean;
+    autoPlaySpeed?: number,//in milli  seconds
     draggable?: boolean,
+    loop?: boolean,
+
+
 };
 
 export default class VersaSlide {
@@ -13,8 +17,11 @@ export default class VersaSlide {
     private slideWidth: number;
     private slidesContent: HTMLElement[];
     private options: VersaSlideOptions = {};
+    private autoPlayTimerId: NodeJS.Timeout | undefined;
+    private autoPlaySpeed: number;
+    private callback: ((data: any) => void) | undefined;
 
-    constructor(private containerSelector: string, options: VersaSlideOptions = {}) {        
+    constructor(private containerSelector: string, options: VersaSlideOptions = {}) {
         this.initOptions(options);
         this.container = document.querySelector(this.containerSelector)!;
         this.slidesContent = Array.from(this.container.children) as HTMLElement[];
@@ -33,6 +40,38 @@ export default class VersaSlide {
 
         //Finally show slide
         this.showSlide(this.index);
+
+        if (this.options.autoPlay) {
+            this.startAutoPlay();
+        }
+    }
+
+    registerShowSlideCallback(callback: (index: number) => void) {
+        this.callback = callback;
+    }
+
+    invokeShowSlideCallback(index: number) {
+        if (this.callback) {
+            this.callback(index);
+        } else {
+            console.log("Callback is not registered.");
+        }
+    }
+
+    public setAutoPlaySpeed(speed: number) {
+        this.options.autoPlaySpeed = speed;
+    }
+
+    public startAutoPlay() {
+        this.autoPlayTimerId = setInterval(() => {
+            this.nextSlide();
+        }, this.options.autoPlaySpeed);
+    }
+
+    public stopAutoPlay() {
+        if (this.autoPlayTimerId) {
+            clearTimeout(this.autoPlayTimerId);
+        }
     }
 
     /**
@@ -42,6 +81,8 @@ export default class VersaSlide {
     private initOptions(options: VersaSlideOptions) {
         this.options.loop = options.loop || false;
         this.options.draggable = options.draggable || false;
+        this.options.autoPlay = options.autoPlay || false;
+        this.options.autoPlaySpeed = options.autoPlaySpeed || 250;
     }
 
     /**
@@ -81,6 +122,7 @@ export default class VersaSlide {
     private showSlide(index: number) {
         let offset = -this.slideWidth * index;
         this.container.style.transform = `translateX(${offset}px)`;
+        this.invokeShowSlideCallback(this.index);
     }
 
     private adjustInfiniteLoop() {
@@ -130,7 +172,7 @@ export default class VersaSlide {
      */
     moveTo(index: number) {
         this.index = index;
-        if(this.options.loop){
+        if (this.options.loop) {
             this.index++;
         }
         this.showSlide(this.index);
@@ -171,5 +213,5 @@ export default class VersaSlide {
 
     public isDraggable() {
         return this.options.draggable;
-    }    
+    }
 }

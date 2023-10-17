@@ -34,11 +34,21 @@ export default class Controls {
         container.appendChild(controlsDiv);
         this.createButtons();
 
-        if(this.slider.isDraggable()){
+        if (this.slider.isDraggable()) {
             this.enableDragging();
         }
-        
 
+        this.slider.registerShowSlideCallback((index) => {
+            const bullets = this.bulletWrapper.childNodes;
+            console.log(index);
+            for (let i = 0; i < bullets.length; i++) {
+                if (i === index) {
+                    (bullets[i] as HTMLElement).classList.add("active");
+                } else {
+                    (bullets[i] as HTMLElement).classList.remove("active");
+                }
+            }
+        });
     }
 
     enableDragging() {
@@ -64,9 +74,9 @@ export default class Controls {
             const matrix = new DOMMatrixReadOnly(transform);
             const translateX = matrix.m41;
 
-            if(translateX < 0){
+            if (translateX < 0) {
                 this.slider.nextSlide();
-            } else{
+            } else {
                 this.slider.prevSlide();
             }
         });
