@@ -2,7 +2,8 @@
 import ControlPanel from "./control-panel";
 
 interface VersaSlideOptions {
-    loop: boolean,
+    loop?: boolean,
+    draggable?: boolean,
 };
 
 export default class VersaSlide {
@@ -11,24 +12,41 @@ export default class VersaSlide {
     private index: number;
     private slideWidth: number;
     private slidesContent: HTMLElement[];
+    private options: VersaSlideOptions = {};
 
-    constructor(private containerId: string, private options: VersaSlideOptions) {
+    constructor(private containerId: string, options: VersaSlideOptions = {}) {        
+        this.initOptions(options);
         this.container = document.querySelector(this.containerId)!;
         this.slidesContent = Array.from(this.container.children) as HTMLElement[];
         this.slides = [];
-        this.index = 1; // We start at 1 because 0 is the clone of the last slide
+        // When the loop option is enabled, we begin at 1 since 0 represents the clone
+        // of the first slide
+        this.index = this.options.loop ? 1 : 0;
         this.slideWidth = this.container.getBoundingClientRect().width;
 
         // Initialize slider
         this.initSlides();
-        this.showSlide(this.index);
 
 
         const controlPanel = new ControlPanel(this);
         controlPanel.createControls();
+
+        //Finally show slide
+        this.showSlide(this.index);
     }
 
+    /**
+     * Initialize option values with user-provided values
+     * @param options 
+     */
+    private initOptions(options: VersaSlideOptions) {
+        this.options.loop = options.loop || false;
+        this.options.draggable = options.draggable || false;
+    }
 
+    /**
+     * 
+     */
     private initSlides() {
         if (this.options.loop) {
             this.prepareForInfiniteLoop();
@@ -42,7 +60,8 @@ export default class VersaSlide {
         });
 
     }
-    prepareForInfiniteLoop() {
+
+    private prepareForInfiniteLoop() {
         // Clone and append the last slide to the start for infinite loop
         let lastClone = this.slidesContent[this.slidesContent.length - 1].cloneNode(true) as HTMLElement;
         lastClone.style.left = `-${this.slideWidth}px`;
@@ -60,7 +79,7 @@ export default class VersaSlide {
     }
 
     private showSlide(index: number) {
-        let offset = -this.slideWidth * (index - (this.options.loop?0:1));
+        let offset = -this.slideWidth * index;
         this.container.style.transform = `translateX(${offset}px)`;
     }
 
@@ -110,7 +129,11 @@ export default class VersaSlide {
      * @param index : the slide index
      */
     moveTo(index: number) {
-        this.showSlide(++index);
+        this.index = index;
+        if(this.options.loop){
+            this.index++;
+        }
+        this.showSlide(this.index);
     }
 
     public setupEventListeners(): void {

@@ -6,6 +6,7 @@ import ControlPanel from "./ts/control-panel";
 document.addEventListener('DOMContentLoaded', (event) => {
     const slider = new Slider('#slider-container', {
         loop: true,
+        draggable: false
     });
 
 });
