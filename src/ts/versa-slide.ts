@@ -14,9 +14,9 @@ export default class VersaSlide {
     private slidesContent: HTMLElement[];
     private options: VersaSlideOptions = {};
 
-    constructor(private containerId: string, options: VersaSlideOptions = {}) {        
+    constructor(private containerSelector: string, options: VersaSlideOptions = {}) {        
         this.initOptions(options);
-        this.container = document.querySelector(this.containerId)!;
+        this.container = document.querySelector(this.containerSelector)!;
         this.slidesContent = Array.from(this.container.children) as HTMLElement[];
         this.slides = [];
         // When the loop option is enabled, we begin at 1 since 0 represents the clone

@@ -10,9 +10,11 @@ module.exports = (env, argv) => {
 
     // Define where and how to output the bundles.
     output: {
-      filename: isDevelopment ? '[name].js' : '[name].[contenthash].js',
+      filename: 'main.js',//isDevelopment ? '[name].js' : '[name].[contenthash].js',
       path: path.resolve(__dirname, 'dist'),
-      clean: true, // Clean the output directory before emit.
+      clean: true, // Clean the output directory before emit.      
+      libraryTarget: 'umd', // Universal Module Definition
+      umdNamedDefine: true,
     },
 
     // Determine how the different types of modules will be treated.

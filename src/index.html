@@ -6,7 +6,7 @@
     <meta viewport="width=device-width, initial-scale=1.0">
     <title>Cloned Slides Slider</title>
     <style>
-        
+
     </style>
 </head>
 
@@ -22,8 +22,17 @@
         </div>
         <!-- controls are  appended here -->
     </div>
-    
+
     <!-- <script src="main.js"></script> -->
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const slider = new VersaSlide('#slider-container', {
+                loop: false,
+                draggable: true
+            });
+
+        });
+    </script>
 </body>
 
 </html>
