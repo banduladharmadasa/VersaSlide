@@ -37,10 +37,13 @@ export default class Controls {
         if (this.slider.isDraggable()) {
             this.enableDragging();
         }
+       
+        this.addEventHandlers();
+    }
 
-        this.slider.registerShowSlideCallback((index) => {
+    addEventHandlers() {
+        this.slider.eventManager.register("activatebullet", (index: number) => {
             const bullets = this.bulletWrapper.childNodes;
-            console.log(index);
             for (let i = 0; i < bullets.length; i++) {
                 if (i === index) {
                     (bullets[i] as HTMLElement).classList.add("active");
@@ -49,6 +52,7 @@ export default class Controls {
                 }
             }
         });
+
     }
 
     enableDragging() {

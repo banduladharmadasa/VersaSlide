@@ -1,5 +1,6 @@
 
 import ControlPanel from "./control-panel";
+import EventManager from "./event-manager";
 
 interface VersaSlideOptions {
     autoPlay?: boolean;
@@ -20,12 +21,15 @@ export default class VersaSlide {
     private autoPlayTimerId: NodeJS.Timeout | undefined;
     private autoPlaySpeed: number;
     private callback: ((data: any) => void) | undefined;
+    public eventManager: EventManager;
+    
 
     constructor(private containerSelector: string, options: VersaSlideOptions = {}) {
         this.initOptions(options);
         this.container = document.querySelector(this.containerSelector)!;
         this.slidesContent = Array.from(this.container.children) as HTMLElement[];
         this.slides = [];
+        this.eventManager = new EventManager();
         // When the loop option is enabled, we begin at 1 since 0 represents the clone
         // of the first slide
         this.index = this.options.loop ? 1 : 0;
@@ -46,17 +50,7 @@ export default class VersaSlide {
         }
     }
 
-    registerShowSlideCallback(callback: (index: number) => void) {
-        this.callback = callback;
-    }
-
-    invokeShowSlideCallback(index: number) {
-        if (this.callback) {
-            this.callback(index);
-        } else {
-            console.log("Callback is not registered.");
-        }
-    }
+    
 
     public setAutoPlaySpeed(speed: number) {
         this.options.autoPlaySpeed = speed;
@@ -122,7 +116,7 @@ export default class VersaSlide {
     private showSlide(index: number) {
         let offset = -this.slideWidth * index;
         this.container.style.transform = `translateX(${offset}px)`;
-        this.invokeShowSlideCallback(this.index);
+        this.eventManager.emit("activatebullet", this.index);
     }
 
     private adjustInfiniteLoop() {
@@ -214,4 +208,8 @@ export default class VersaSlide {
     public isDraggable() {
         return this.options.draggable;
     }
+
+  
+   
+    
 }
