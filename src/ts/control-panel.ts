@@ -4,12 +4,13 @@ import VersaSlide from "./versa-slide";
  * Add the controls dynamically
  */
 export default class Controls {
-    private sliderContainer: HTMLElement
     previousWrapper: HTMLDivElement;
     nextWrapper: HTMLDivElement;
     bulletWrapper: HTMLDivElement;
-    constructor(private slider: VersaSlide) {
+    isDragging: boolean;
+    posXBeforeDrag: number;
 
+    constructor(private slider: VersaSlide) {
 
     }
 
@@ -37,57 +38,66 @@ export default class Controls {
         if (this.slider.isDraggable()) {
             this.enableDragging();
         }
-       
+
         this.addEventHandlers();
     }
 
     addEventHandlers() {
-        this.slider.eventManager.register("activatebullet", (index: number) => {
-            const bullets = this.bulletWrapper.childNodes;
-            for (let i = 0; i < bullets.length; i++) {
-                if (i === index) {
-                    (bullets[i] as HTMLElement).classList.add("active");
-                } else {
-                    (bullets[i] as HTMLElement).classList.remove("active");
+        if (this.slider.getOptions().showBullets) {
+            this.slider.eventManager.register("activatebullet", (index: number) => {
+                const bullets = this.bulletWrapper.childNodes;
+                for (let i = 0; i < bullets.length; i++) {
+                    if (i === index) {
+                        (bullets[i] as HTMLElement).classList.add("active");
+                    } else {
+                        (bullets[i] as HTMLElement).classList.remove("active");
+                    }
                 }
-            }
-        });
+            });
+        }
+
 
     }
 
     enableDragging() {
         const container = this.slider.getContainer();
-        let isDragging = false;
+        this.isDragging = false;
         let offsetX: number;
 
         container.addEventListener("mousedown", (e) => {
-            isDragging = true;
-            offsetX = e.clientX - container.getBoundingClientRect().left;
+            this.isDragging = true;
+            this.posXBeforeDrag = container.getBoundingClientRect().left;
+            offsetX = e.clientX - this.posXBeforeDrag;            
         });
 
         container.addEventListener("mousemove", (e) => {
-            if (!isDragging) return;
+            container.style.cursor = this.slider.getOptions().mouseOverCursor;
+            if (!this.isDragging) return;
+            container.style.cursor = this.slider.getOptions().draggingCursor;
             const newX = e.clientX - offsetX;
             container.style.transform = `translateX(${newX}px)`;
         });
 
         container.addEventListener("mouseup", (evt) => {
-            isDragging = false;
-            const computedStyle = window.getComputedStyle(container);
-            const transform = computedStyle.getPropertyValue("transform");
-            const matrix = new DOMMatrixReadOnly(transform);
-            const translateX = matrix.m41;
-
-            if (translateX < 0) {
-                this.slider.nextSlide();
-            } else {
-                this.slider.prevSlide();
-            }
+            this.completeDragging();
         });
 
         container.addEventListener("dragstart", (e) => {
             e.preventDefault();
         })
+    }
+
+    completeDragging() {
+        const container = this.slider.getContainer();
+        this.isDragging = false;
+        const posXAfterDrag = container.getBoundingClientRect().left;
+        if ( posXAfterDrag < this.posXBeforeDrag) {
+            this.slider.nextSlide();
+        } else {
+            this.slider.prevSlide();
+        }
+
+        container.style.cursor = 'default';
     }
 
     createControlWrapper(parent: HTMLElement, className: string) {
@@ -114,6 +124,13 @@ export default class Controls {
             evt.preventDefault();
         });
 
+        prevBtn.addEventListener('mouseup', (e) => {     
+            if(this.isDragging){
+                this.completeDragging();                
+            }  
+            e.preventDefault();
+        })
+
         //create next button
         const nextBtn = this.createButton("versaslider-controls-next-button", "versaslider-next-btn");
         this.nextWrapper.appendChild(nextBtn);
@@ -123,16 +140,25 @@ export default class Controls {
             evt.preventDefault();
         });
 
-        //create bullet buttons (dots)
-        const count = this.slider.getActualSlidesCount();
-        for (let i = 0; i < count; i++) {
-            const dot = this.createButton("versaslider-controls-bullet", "versaslider-bullet-" + i);
-            this.bulletWrapper.appendChild(dot);
-            dot.addEventListener("click", (evt) => {
-                this.slider.moveTo(i);
-                evt.preventDefault();
-            });
+        nextBtn.addEventListener('mouseup', (e) => {
+            if(this.isDragging){
+                this.completeDragging();                
+            } 
+            e.preventDefault();      
+        })
 
+        //create bullet buttons (dots)
+        if (this.slider.getOptions().showBullets) {
+            const count = this.slider.getActualSlidesCount();
+            for (let i = 0; i < count; i++) {
+                const dot = this.createButton("versaslider-controls-bullet", "versaslider-bullet-" + i);
+                this.bulletWrapper.appendChild(dot);
+                dot.addEventListener("click", (evt) => {
+                    this.slider.moveTo(i);
+                    evt.preventDefault();
+                });
+
+            }
         }
 
 

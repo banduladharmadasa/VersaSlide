@@ -4,9 +4,12 @@ import EventManager from "./event-manager";
 
 interface VersaSlideOptions {
     autoPlay?: boolean;
-    autoPlaySpeed?: number,//in milli  seconds
+    autoPlaySpeed?: number,//in milli seconds
     draggable?: boolean,
     loop?: boolean,
+    showBullets?: boolean,
+    mouseOverCursor?: string,
+    draggingCursor?: string,
 
 
 };
@@ -19,10 +22,8 @@ export default class VersaSlide {
     private slidesContent: HTMLElement[];
     private options: VersaSlideOptions = {};
     private autoPlayTimerId: NodeJS.Timeout | undefined;
-    private autoPlaySpeed: number;
-    private callback: ((data: any) => void) | undefined;
     public eventManager: EventManager;
-    
+
 
     constructor(private containerSelector: string, options: VersaSlideOptions = {}) {
         this.initOptions(options);
@@ -50,7 +51,7 @@ export default class VersaSlide {
         }
     }
 
-    
+
 
     public setAutoPlaySpeed(speed: number) {
         this.options.autoPlaySpeed = speed;
@@ -77,6 +78,17 @@ export default class VersaSlide {
         this.options.draggable = options.draggable || false;
         this.options.autoPlay = options.autoPlay || false;
         this.options.autoPlaySpeed = options.autoPlaySpeed || 250;
+        this.options.showBullets = options.showBullets || false;
+        this.options.mouseOverCursor = options.mouseOverCursor || 'grab',
+        this.options.draggingCursor = options.draggingCursor || 'grabbing'
+    }
+
+    /**
+     * 
+     * @returns 
+     */
+    public getOptions(): VersaSlideOptions {
+        return this.options;
     }
 
     /**
@@ -116,7 +128,10 @@ export default class VersaSlide {
     private showSlide(index: number) {
         let offset = -this.slideWidth * index;
         this.container.style.transform = `translateX(${offset}px)`;
-        this.eventManager.emit("activatebullet", this.index);
+        if (this.options.showBullets) {
+            this.eventManager.emit("activatebullet", this.index);
+        }
+
     }
 
     private adjustInfiniteLoop() {
@@ -176,14 +191,24 @@ export default class VersaSlide {
         this.container.addEventListener('transitionend', () => {
             this.adjustInfiniteLoop();
         });
+
+        window.addEventListener("resize", () =>{
+            this.slideWidth = this.container.getBoundingClientRect().width;
+        });
     }
 
+    /**
+     * Returns the container that encapsulates the slider object
+     * @returns 
+     */
     public getContainer(): HTMLElement {
         return this.container;
     }
 
     public getActualSlidesCount(): number {
-        return this.slides.filter((slide) => !(slide.classList.contains('cloned-last') || slide.classList.contains('cloned-first'))).length;
+        return this.slides.filter((slide) =>
+            !(slide.classList.contains('cloned-last') ||
+                slide.classList.contains('cloned-first'))).length;
     }
 
     public getCurrentIndex(): number {
@@ -209,7 +234,7 @@ export default class VersaSlide {
         return this.options.draggable;
     }
 
-  
-   
-    
+
+
+
 }
